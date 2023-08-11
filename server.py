@@ -91,6 +91,10 @@ def purchasePlaces():
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
+@app.route('/pointsDisplay')
+def pointsDisplay():
+    return render_template('points_display.html', clubs=clubs)
+
 
 @app.route('/logout')
 def logout():
