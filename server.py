@@ -37,15 +37,34 @@ def showSummary():
 
 
 
-@app.route('/book/<competition>/<club>')
-def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
-    else:
+@app.route('/book/<competition>/<club>', methods=['GET', 'POST'])
+def book(competition, club):
+    foundClub = next((c for c in clubs if c['name'] == club), None)
+    foundCompetition = next((c for c in competitions if c['name'] == competition), None)
+
+    if foundClub is None or foundCompetition is None:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
+
+    if request.method == 'POST':
+        places_to_book = int(request.form['places'])
+
+        if places_to_book > 12:
+            flash("Cannot book more than 12 places")
+            return render_template('booking.html', club=foundClub, competition=foundCompetition)
+
+        if places_to_book > foundCompetition['numberOfPlaces']:
+            flash("Not enough places available for booking")
+            return render_template('booking.html', club=foundClub, competition=foundCompetition)
+
+        # Mettre à jour le nombre de places de la compétition
+        foundCompetition['numberOfPlaces'] -= places_to_book
+
+        flash("Booking complete!")
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
+
+    return render_template('booking.html', club=foundClub, competition=foundCompetition)
+
 
 
 @app.route('/purchasePlaces', methods=['POST'])
