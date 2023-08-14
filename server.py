@@ -1,17 +1,26 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
+import os
+
+template_folder = os.path.join(os.path.dirname(__file__), 'templates')
+app = Flask(__name__, template_folder=template_folder)
 
 
 def loadClubs():
-    with open('clubs.json') as c:
+    clubs_path = os.path.join(os.path.dirname(__file__), 'clubs.json')
+    with open(clubs_path) as c:
          listOfClubs = json.load(c)['clubs']
          return listOfClubs
 
 
 def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+    competitions_path = os.path.join(os.path.dirname(__file__), 'competitions.json')
+    with open(competitions_path) as comps:
+        listOfCompetitions = json.load(comps)['competitions']
+        for competition in listOfCompetitions:
+            competition['numberOfPlaces'] = int(competition['numberOfPlaces'])  # Convert to int
+        return listOfCompetitions
+
 
 
 app = Flask(__name__)
@@ -75,20 +84,25 @@ def purchasePlaces():
 
     competition = next((c for c in competitions if c['name'] == competition_name), None)
     club = next((c for c in clubs if c['name'] == club_name), None)
-
+    
     if club is None or competition is None:
         flash('Club or competition not found')
         return render_template('index.html')
+    
+    club_points = int(club['points'])
 
-    if places_required > club['available_points']:
+    if places_required > club_points:
         flash('Cannot use more points than available')
-        return render_template('club.html', club=club)
+        return render_template('welcome.html', club=club)
 
-    competition['numberOfPlaces'] -= places_required
-    club['available_points'] -= places_required
+    number_of_places = int(competition['numberOfPlaces'])
+    number_of_places -= places_required
+
+    club_points -= places_required
 
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
+
 
 
 @app.route('/pointsDisplay')
