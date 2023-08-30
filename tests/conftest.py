@@ -1,51 +1,59 @@
 import pytest
-from flask import Flask
-
-# Définir les données mockées
-MOCKED_CLUBS_DATA = [
-    {"name": "Club A", "email" : "john@simplylift.co", "points": 100},
-    {"name": "Club B", "email" : "admin@irontemple.com",  "points": 200},
-    # ... autres clubs mockés
-]
-
-MOCKED_COMPETITIONS_DATA = [
-    {"name": "Competition X", "date" : "2020-10-22 13:30:00", "numberOfPlaces": 50},
-    {"name": "Competition Y", "date" : "2020-10-22 13:30:00" , "numberOfPlaces": 30},
-]
+from server import app
 
 @pytest.fixture
-def app():
-    app = Flask(__name__)
+def client():
     app.config['TESTING'] = True
-    return app
-
-@pytest.fixture
-def client(app):
     with app.test_client() as client:
         yield client
 
 @pytest.fixture
-def mocked_clubs(monkeypatch):
-    monkeypatch.setattr('server.loadClubs', lambda: MOCKED_CLUBS_DATA)
-    return MOCKED_CLUBS_DATA
-
-@pytest.fixture
 def mocked_competitions(monkeypatch):
-    monkeypatch.setattr('server.loadCompetitions', lambda: MOCKED_COMPETITIONS_DATA)
-    return MOCKED_COMPETITIONS_DATA
+    # Mocked competitions data
+    mocked_competitions_data = [
+        {
+            "name": "Spring Festival",
+            "date": "2020-03-27 10:00:00",
+            "numberOfPlaces": 25
+        },
+        {
+            "name": "Fall Classic",
+            "date": "2020-10-22 13:30:00",
+            "numberOfPlaces": 13
+        }
+    ]
+    
+    def mock_load_competitions():
+        return mocked_competitions_data
+
+    monkeypatch.setattr('server.loadCompetitions', mock_load_competitions)
+    
+    return mocked_competitions_data
 
 @pytest.fixture
-def club_name():
-    return "Invalid Club" 
+def mocked_clubs(monkeypatch):
+    # Mocked clubs data
+    mocked_clubs_data = [
+        {
+            "name": "Simply Lift",
+            "email": "john@simplylift.co",
+            "points": "13"
+        },
+        {
+            "name": "Iron Temple",
+            "email": "admin@irontemple.com",
+            "points": "4"
+        },
+        {
+            "name": "She Lifts",
+            "email": "kate@shelifts.co.uk",
+            "points": "12"
+        }
+    ]
+    
+    def mock_load_clubs():
+        return mocked_clubs_data
 
-@pytest.fixture
-def competition_name():
-    return "Invalid Competition" 
-
-@pytest.fixture
-def places_required():
-    return "5"
-
-@pytest.fixture
-def expected_message():
-    return "Invalid club or competition"
+    monkeypatch.setattr('server.loadClubs', mock_load_clubs)
+    
+    return mocked_clubs_data

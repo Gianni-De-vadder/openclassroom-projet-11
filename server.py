@@ -51,20 +51,28 @@ def book(competition, club):
     foundClub = next((c for c in clubs if c['name'] == club), None)
     foundCompetition = next((c for c in competitions if c['name'] == competition), None)
 
+    if foundClub is None or foundCompetition is None:
+        flash("Club or competition not found")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
     club_point = int(foundClub.get("points"))
+
     if club_point > MAX_LIMIT:
         club_point = MAX_LIMIT
 
-    if foundClub is None or foundCompetition is None:
-        flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
 
     return render_template('booking.html', club=foundClub, competition=foundCompetition, limit=club_point)
+
+
+places_booked = []
+
 
 
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
+    global places_booked  # Déclarez la variable comme étant globale
+
     competition_name = request.form['competition']
     club_name = request.form['club']
     places_required = int(request.form['places'])
@@ -80,7 +88,7 @@ def purchasePlaces():
 
     if places_required > club_points:
         flash('Cannot use more points than available')
-        return render_template('welcome.html', club=club)
+        return render_template('welcome.html', club=club, competitions=competitions)
 
     number_of_places = int(competition['numberOfPlaces'])
     
@@ -101,13 +109,6 @@ def purchasePlaces():
         if c['name'] == competition_name:
             c['numberOfPlaces'] = str(number_of_places)
             break
-
-    # Enregistrer les données mises à jour dans les fichiers JSON
-    with open('clubs.json', 'w') as c:
-        json.dump({'clubs': clubs}, c, indent=4)
-
-    with open('competitions.json', 'w') as comps:
-        json.dump({'competitions': competitions}, comps, indent=4)
 
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
