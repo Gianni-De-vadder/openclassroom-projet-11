@@ -64,15 +64,12 @@ def book(competition, club):
     return render_template('booking.html', club=foundClub, competition=foundCompetition, limit=club_point)
 
 
-places_booked = []
 
 
 
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    global places_booked  # Déclarez la variable comme étant globale
-
     competition_name = request.form['competition']
     club_name = request.form['club']
     places_required = int(request.form['places'])
@@ -99,7 +96,6 @@ def purchasePlaces():
     number_of_places -= places_required
     club_points -= places_required
     
-    # Mettre à jour les données dans les fichiers JSON
     for c in clubs:
         if c['name'] == club_name:
             c['points'] = str(club_points)

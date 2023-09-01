@@ -13,6 +13,3 @@ def test_book_invalid_competition(client):
 
     # Check if the expected message is in the response content
     assert "Club or competition not found" in response_text
-
-if __name__ == "__main__":
-    pytest.main()

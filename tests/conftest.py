@@ -7,9 +7,8 @@ def client():
     with app.test_client() as client:
         yield client
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mocked_competitions(monkeypatch):
-    # Mocked competitions data
     mocked_competitions_data = [
         {
             "name": "Spring Festival",
@@ -30,9 +29,8 @@ def mocked_competitions(monkeypatch):
     
     return mocked_competitions_data
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mocked_clubs(monkeypatch):
-    # Mocked clubs data
     mocked_clubs_data = [
         {
             "name": "Simply Lift",
@@ -51,9 +49,7 @@ def mocked_clubs(monkeypatch):
         }
     ]
     
-    def mock_load_clubs():
-        return mocked_clubs_data
 
-    monkeypatch.setattr('server.loadClubs', mock_load_clubs)
+    monkeypatch.setattr('server.clubs', mocked_clubs_data)
     
     return mocked_clubs_data

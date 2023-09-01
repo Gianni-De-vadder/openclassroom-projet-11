@@ -9,6 +9,3 @@ def test_book_valid_booking(client):
     )
     assert b"Spring Festival" in response.data
 
-
-if __name__ == "__main__":
-    pytest.main()
