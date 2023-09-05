@@ -8,7 +8,6 @@
 
 <body>
     <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a><br>
-    <a href="{{url_for('pointsDisplay')}}">Show clubs points</a>
 
     {% with messages = get_flashed_messages()%}
     {% if messages %}
