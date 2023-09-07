@@ -1,6 +1,7 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 import os
+from datetime import datetime
 
 template_folder = os.path.join(os.path.dirname(__file__), 'templates')
 app = Flask(__name__, template_folder=template_folder)
@@ -35,6 +36,7 @@ def index():
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
+    now = str(datetime.now())
     email = request.form.get('email')
     club = next((c for c in clubs if c['email'] == email), None)
 
@@ -42,7 +44,7 @@ def showSummary():
         flash('Unknown email address')
         return render_template('index.html')
 
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club, competitions=competitions, now=now)
 
 
 
@@ -50,10 +52,11 @@ def showSummary():
 def book(competition, club):
     foundClub = next((c for c in clubs if c['name'] == club), None)
     foundCompetition = next((c for c in competitions if c['name'] == competition), None)
+    now = str(datetime.now())
 
     if foundClub is None or foundCompetition is None:
         flash("Club or competition not found")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, now=now)
     
     club_point = int(foundClub.get("points"))
 
@@ -83,9 +86,16 @@ def purchasePlaces():
     
     club_points = int(club['points'])
 
+    competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
+    now = str(datetime.now())
+
+    if competition_date < now:
+        flash('Cannot book a passed event')
+        return render_template('welcome.html', club=club, competitions=competitions, now=now)
+    
     if places_required > club_points:
         flash('Cannot use more points than available')
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, now=now)
 
     number_of_places = int(competition['numberOfPlaces'])
     
@@ -107,7 +117,7 @@ def purchasePlaces():
             break
 
     flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club, competitions=competitions, now=now)
 
 
 
